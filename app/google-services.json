@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "369879821608",
+    "project_id": "aiflash-e585c",
+    "storage_bucket": "aiflash-e585c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:369879821608:android:795e3fdee16e002ff7341d",
+        "android_client_info": {
+          "package_name": "com.ilham.aiflash"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDI65FOfwIZQ60pjYwgoxMG8x3ZLPqbNI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
