@@ -1,5 +1,6 @@
 package com.ilham.presentation.aigenerate
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +26,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,17 +51,25 @@ fun GenerateAIScreen(
     viewModel: GenerateAIViewModel = hiltViewModel<GenerateAIViewModel, GenerateAIViewModel.Factory>(
         key = deckId
     ){ factory -> factory.create(deckId) },
-    navigateUp: () -> Unit
+    navigateUp: () -> Unit,
+    isSaveSuccess: () -> Unit
 ) = with(viewModel){
 
     val uiState by uiState.collectAsStateWithLifecycle()
     val snackbarHostState = rememberSnackBarHostState()
 
+    LaunchedEffect(Unit) {
+        saveSuccess.collect { message ->
+            snackbarHostState.showSnackbar(message)
+            isSaveSuccess()
+        }
+    }
+
     GenerateAIContent(
         uiState = uiState,
         navigateUp = navigateUp,
         onEditClick = {},
-        onGenerateChanged = ::onTopicChanged,
+        onTopicChanged = ::onTopicChanged,
         onCardCountChanged = ::onCardCountChanged,
         onGenerate = ::generateFlashCard,
         onSaveAll = ::saveGenerateCards,
@@ -75,7 +85,7 @@ fun GenerateAIContent(
     uiState: GenerateAIUiState = GenerateAIUiState(),
     navigateUp: () -> Unit,
     onEditClick: () -> Unit,
-    onGenerateChanged: (String) -> Unit,
+    onTopicChanged: (String) -> Unit,
     onCardCountChanged: (Int) -> Unit,
     onGenerate: () -> Unit = {},
     onSaveAll: () -> Unit = {},
@@ -144,7 +154,7 @@ fun GenerateAIContent(
             item { 
                 FlashTextField(
                     value = uiState.topic,
-                    onValueChange = onGenerateChanged,
+                    onValueChange = onTopicChanged,
                     placeholder = "example: Pemrograman Android untuk Pemula",
                     minLines = 3
                 )
@@ -157,8 +167,9 @@ fun GenerateAIContent(
                             FilterChip(
                                 selected = uiState.cardCount == count,
                                 onClick = { onCardCountChanged(count) },
+                                enabled = !uiState.isGenerating && !uiState.isSaving,
                                 label = { Text(text = count.toString(), style = FlashTypography.labelLarge) },
-                                shape = FlashShape.medium,
+                                shape = FlashShape.full,
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = FlashColors.Indigo100,
                                     selectedLabelColor = FlashColors.Indigo700

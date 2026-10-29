@@ -2,6 +2,8 @@ package com.ilham.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -21,6 +23,7 @@ import com.ilham.presentation.login.LoginScreen
 import com.ilham.presentation.register.RegisterScreen
 import com.ilham.presentation.splash.SplashScreen
 import com.ilham.presentation.study_mode.StudyModeScreen
+import kotlinx.coroutines.launch
 
 @Composable
 fun AppNavigation(
@@ -29,6 +32,8 @@ fun AppNavigation(
 ) {
 
     val backStack = rememberNavBackStack(AppRoute.Login)
+
+    val scope = rememberCoroutineScope()
 
     SideEffect {
         navigator.setBackState(backStack)
@@ -84,7 +89,13 @@ fun AppNavigation(
             entry<AppRoute.GenerateAI> { route ->
                 GenerateAIScreen(
                     deckId = route.deckId,
-                    navigateUp = { navigator.navigateBack() }
+                    navigateUp = { navigator.navigateBack() },
+                    isSaveSuccess = {
+                        scope.launch {
+                            navigator.navigateBack()
+                        }
+                    }
+
                 )
             }
             entry<AppRoute.AddDeck> { route ->

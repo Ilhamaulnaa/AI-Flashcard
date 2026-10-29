@@ -157,7 +157,7 @@ fun DeckDetailScreenContent(
         LazyColumn (
             modifier = modifier
                 .fillMaxSize()
-                .padding(horizontal = FlashSpacing.md)
+                .padding(horizontal = FlashSpacing.md, vertical = FlashSpacing.lg)
                 .padding(paddingValues)
         ) {
             item {

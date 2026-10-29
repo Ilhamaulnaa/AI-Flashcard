@@ -1,5 +1,7 @@
 package com.ilham.presentation.aigenerate
 
+import android.util.Log
+import androidx.compose.animation.core.tween
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -36,6 +38,9 @@ class GenerateAIViewModel @AssistedInject constructor(
 
     private val _showSnackbar = Channel<String>()
     val showSnackbar = _showSnackbar.receiveAsFlow()
+
+    private val _saveSuccess = Channel<String>()
+    val saveSuccess = _saveSuccess.receiveAsFlow()
 
     init {
         viewModelScope.launch {
@@ -101,7 +106,7 @@ class GenerateAIViewModel @AssistedInject constructor(
                 )
             }.onSuccess { cards ->
                 _uiState.update {
-                    it.copy(isLoading = false, generatedCards = cards)
+                    it.copy(isLoading = false, generatedCards = cards, isGenerating = false)
                 }
             }.onFailure { throwable ->
                 _uiState.update {
@@ -140,6 +145,8 @@ class GenerateAIViewModel @AssistedInject constructor(
             }.onSuccess {
                 _uiState.update {
                     it.copy(isSaving = false, isSaveSuccess = true)
+                    _saveSuccess.send("${cards.size} kartu ditambahkan ke deck")
+                    return@launch
                 }
             }.onFailure { throwable ->
                 _uiState.update {

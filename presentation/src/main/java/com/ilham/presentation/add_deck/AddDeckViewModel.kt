@@ -1,5 +1,6 @@
 package com.ilham.presentation.add_deck
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -70,9 +71,10 @@ class AddDeckViewModel @AssistedInject constructor(
     }
 
     fun addDeck() {
+        Log.d("SaveCheck", "submit dipanggil")
         viewModelScope.launch {
-            val state = _uiState.value
 
+            val state = _uiState.value
             if (state.title.isBlank()) {
                 _showSnackbar.send("Nama deck tidak boleh kosong.")
                 return@launch
@@ -80,6 +82,7 @@ class AddDeckViewModel @AssistedInject constructor(
 
             _uiState.update { it.copy(isLoading = true) }
             runCatching {
+                Log.d("SaveCheck", "mulai disimpan")
                 if (state.isEditMode && state.deckId != null) {
                     useCaseDeck.updateDeck(
                         deckId = state.deckId,
@@ -96,11 +99,13 @@ class AddDeckViewModel @AssistedInject constructor(
                         emoji = state.emoji,
                     )
                 }
-                _uiState.update { it.copy(isLoading = false, isSuccess = true) }
+                Log.d("SaveCheck", "repo selesai")
             }.onFailure { throwable ->
+                Log.d("SaveCheck", "submit failure", throwable)
                 _uiState.update { it.copy(isLoading = false) }
                 _showSnackbar.send(throwable.message ?: submitErrorMessage(state.isEditMode))
             }.onSuccess {
+                Log.d("SaveCheck", "submit sukses")
                 _uiState.update { it.copy(isLoading = false, isSuccess = true) }
             }
         }

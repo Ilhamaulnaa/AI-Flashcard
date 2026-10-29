@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
@@ -41,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -145,6 +148,7 @@ fun AddDeckContentScreen(
                 .fillMaxSize()
                 .padding(horizontal = FlashSpacing.md)
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
         ) {
             Text(
                 text = "Nama Deck",
@@ -167,7 +171,7 @@ fun AddDeckContentScreen(
             FlashTextField(
                 value = uiState.description ?: "",
                 onValueChange = onDescriptionChanged,
-                placeholder = "Apa yang akan kamu pelajari hari ini ?" ,
+                placeholder = "Apa yang akan kamu pelajari hari ini ?",
             )
             Spacer(modifier = Modifier.height(FlashSpacing.sm))
             Text(
@@ -177,7 +181,7 @@ fun AddDeckContentScreen(
             )
             DeckIconComposer(
                 selectedIconName = uiState.emoji.ifBlank { deckEmojis.first().name },
-                onIconSelected = onIconSelected
+                onIconSelected = { onIconSelected(it.name) }
             )
             Spacer(modifier = Modifier.height(FlashSpacing.sm))
             Text(
@@ -187,52 +191,53 @@ fun AddDeckContentScreen(
             )
             DeckColorComposer(
                 selectedColorName = uiState.color.ifBlank { deckColors.first().name },
-                onColorSelected = onColorSelected
+                onColorSelected = { onColorSelected(it.name) }
             )
             Spacer(modifier = Modifier.height(FlashSpacing.md))
             FlashButton(
-                text = "Buat deck sekarang",
+                text = if (uiState.isEditMode) "Simpan Perubahan" else "Buat deck sekarang",
                 onClick = onAddDeck,
+                modifier = Modifier.fillMaxWidth(),
                 isLoading = uiState.isLoading,
-                modifier = Modifier.fillMaxWidth()
             )
             if (uiState.isEditMode){
                 Spacer(Modifier.height(12.dp))
                 FlashButton(
                     text = "Hapus Deck",
                     onClick = { showDeleteConfirmation = true },
-                    isLoading = uiState.isLoading,
-                    modifier = Modifier.fillMaxWidth()
+                    color = FlashColors.DeckPink,
+                    modifier = Modifier.fillMaxWidth(),
+                    isLoading = uiState.isDeleting,
                 )
             }
         }
     }
     if (showDeleteConfirmation){
         ConfirmationDialog(
+            title = "anda yakin ingin menghapus deck ?",
+            message = "Deck kartu yang ada didalamnya akan ikut terhapus.",
             onDismiss = { showDeleteConfirmation = false },
             onConfirm = {
                 showDeleteConfirmation = false
                 onDeleteDeck()
             },
-            title = "anda yakin ingin menghapus deck ?",
-            message = "Deck kartu yang ada didalamnya akan ikut terhapus."
         )
     }
-    
+
 }
 
 @Composable
 fun DeckIconComposer(
     modifier: Modifier = Modifier,
     selectedIconName: String,
-    onIconSelected: (String) -> Unit
+    onIconSelected: (DeckIcon) -> Unit
 ) {
 
     LazyRow(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         items(deckEmojis, key = { it.name }) { icon ->
             val isSelected = icon.name == selectedIconName
             Surface(
-                modifier = modifier.clickable { onIconSelected(icon.name) },
+                modifier = modifier.clickable { onIconSelected(icon) },
                 shape = FlashShape.small,
                 color = if (isSelected) FlashColors.Indigo50 else FlashColors.Surface,
                 border = BorderStroke(
@@ -257,7 +262,7 @@ fun DeckIconComposer(
 fun DeckColorComposer(
     modifier: Modifier = Modifier,
     selectedColorName: String,
-    onColorSelected: (String) -> Unit
+    onColorSelected: (DeckColor) -> Unit
 ) {
 
     LazyRow(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -267,7 +272,7 @@ fun DeckColorComposer(
                 modifier = Modifier
                     .clip(CircleShape)
                     .background(color = deckColor.color)
-                    .clickable { onColorSelected(deckColor.name) },
+                    .clickable { onColorSelected(deckColor) },
                 shape = CircleShape,
                 border = BorderStroke(
                     width = if (isColorSelected) 2.dp else 1.dp,

@@ -3,6 +3,8 @@ package com.ilham.component
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +19,8 @@ import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +47,12 @@ fun AuthTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions()
 ) {
 
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val borderWidth = if(isFocused) 2.dp else 1.dp
+    val borderColor = if(isFocused) FlashColors.Gray400 else FlashColors.Gray100
+
     Column(
         modifier = modifier.fillMaxWidth()
     ) {
@@ -53,7 +63,7 @@ fun AuthTextField(
         BasicTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(BorderStroke(width = 1.dp, FlashColors.Gray200), shape = FlashShape.medium)
+                .border(BorderStroke(borderWidth, borderColor), shape = FlashShape.medium)
                 .clip(FlashShape.medium)
                 .background(color = FlashColors.Gray100)
                 .padding(FlashSpacing.md),
@@ -61,6 +71,7 @@ fun AuthTextField(
             onValueChange = onValueChange,
             visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = keyboardOptions,
+            interactionSource = interactionSource,
             decorationBox = { innerTextField ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(

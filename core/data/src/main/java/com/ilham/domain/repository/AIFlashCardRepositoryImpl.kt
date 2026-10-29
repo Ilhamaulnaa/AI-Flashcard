@@ -1,6 +1,5 @@
 package com.ilham.domain.repository
 
-import com.ilham.data.BuildConfig
 import com.ilham.data.dto.GeneratedFlashCardsDto
 import com.ilham.domain.model.FlashCard
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +16,6 @@ import kotlinx.serialization.json.put
 import java.net.HttpURLConnection
 import java.net.URL
 import javax.inject.Inject
-
 
 class AIFlashCardRepositoryImpl @Inject constructor(
     private val apiKey: String,
